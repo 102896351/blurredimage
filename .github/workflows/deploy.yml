@@ -17,6 +17,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # GitHub Pages serves this repo under /blurredimage — build with matching base
+      PAGES_BASE: /blurredimage
     steps:
       - name: Checkout
         uses: actions/checkout@v4

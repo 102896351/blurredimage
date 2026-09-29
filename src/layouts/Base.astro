@@ -35,6 +35,8 @@ const {
 } = Astro.props;
 
 const p = basePath === '/' ? '' : basePath;
+// Deployment base: '' on production (root), '/blurredimage' on GitHub Pages.
+const B = import.meta.env.BASE_URL.replace(/\/+$/, '');
 const canonical = lang === 'zh' ? `${site}/zh${p || '/'}` : `${site}${p || '/'}`;
 const enUrl = `${site}${p || '/'}`;
 const zhUrl = `${site}/zh${p || '/'}`;
@@ -49,6 +51,8 @@ const selfUrl = canonical;
 const altLangCode = zh ? 'en' : 'zh-CN';
 
 // Internal links: bilingual pages get a /zh prefix; English-only pages stay at root.
+// NOTE: hand-written root-absolute hrefs/srcs are prefixed at build time by the
+// rewrite-absolute-paths integration (see astro.config.mjs) — do NOT add B here.
 const L = (path: string, bilingual = true) => (zh && bilingual ? `/zh${path}` : path);
 // Blog posts have no Chinese version -> Chinese switch lands on the zh blog list.
 // Legal pages have no Chinese version -> land on the zh home.
@@ -126,21 +130,22 @@ const schemaJson = JSON.stringify(schema ?? defaultSchema);
       </>
     )}
 
-    <script is:inline>
+    <script is:inline define:vars={{ deployBase: B }}>
       // Auto language detection: CN visitors -> /zh/, others -> root (English).
       // Runs only on external entries; a manual switch stores 'tb-lang' and wins forever.
       (function () {
         try {
+          var B = deployBase || '';
           if (localStorage.getItem('tb-lang')) return;
           var external = !document.referrer || document.referrer.indexOf(location.host) === -1;
           if (!external) return;
-          var isZh = location.pathname.indexOf('/zh') === 0;
-          var path = location.pathname.replace(/^\/zh(?=\/|$)/, '') || '/';
+          var isZh = location.pathname.indexOf(B + '/zh') === 0;
+          var path = location.pathname.replace(new RegExp('^' + (B ? B + '/zh' : '/zh') + '(?=/|$)'), '') || '/';
           fetch('/cdn-cgi/trace').then(function (r) { return r.text(); }).then(function (txt) {
             var m = /loc=([A-Z]{2})/.exec(txt);
             var cn = m ? m[1] === 'CN' : (navigator.language || '').toLowerCase().indexOf('zh') === 0;
             localStorage.setItem('tb-lang', cn ? 'zh' : 'en');
-            if (cn && !isZh) location.replace('/zh' + path);
+            if (cn && !isZh) location.replace(B + '/zh' + path);
           }).catch(function () {});
         } catch (e) {}
       })();
