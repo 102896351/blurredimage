@@ -1,0 +1,80 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const tags = [...new Set(posts.flatMap((p) => p.data.tags))];
+  return tags.map((tag) => ({
+    params: { tag },
+    props: {
+      tag,
+      posts: posts
+        .filter((p) => p.data.tags.includes(tag))
+        .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()),
+    },
+  }));
+}
+
+const { tag, posts } = Astro.props;
+
+// Human-readable tag label: blur-license-plate -> "blur license plate"
+const label = tag.replace(/-/g, ' ');
+
+// Curated one-liners for the highest-volume tags; template fallback for the rest.
+const blurbs: Record<string, string> = {
+  'blur': 'Blurring is the fastest way to hide what should not be published. These guides compare gaussian, pixel and noise effects and show when each one is the right choice.',
+  'blur-face': 'Faces are the detail readers notice first. This collection covers brush, rectangle and lasso selection so you can hide identities in group photos without wrecking the shot.',
+  'blur-image': 'From whole-image blur to selective redaction, these walkthroughs show how to apply the effect in your browser and export a clean result.',
+  'blur-license-plate': 'Plates are neat rectangles, which makes them easy to cover precisely. Learn how to redact car photos for listings, social posts and claim paperwork.',
+  'blur-text': 'Names, addresses, order numbers and account IDs leak constantly through screenshots. These articles show how to cover text so it cannot be read back.',
+  'blur-screenshot': 'Screenshots carry far more metadata and detail than people expect. Use these checklists before you share a screen capture publicly.',
+  'blur-background': 'Background blur is as much a creative effect as a privacy tool — here is how to use it for depth, focus and cleaner product shots.',
+  'blur-photo': 'Practical guides for blurring photos before publishing: what to cover, how much margin to leave and how to verify the result.',
+  'blur-qr-code': 'QR codes in screenshots can expose links, tickets and login tokens. Learn when a QR code must be covered and how to do it cleanly.',
+  'blur-address': 'Addresses on labels, packages and documents identify people directly. These guides cover safe redaction before sharing.',
+  'compress-image': 'Smaller files upload faster and cost less bandwidth. Compare quality settings and formats to find the balance that keeps images sharp.',
+  'image-optimization': 'Optimization is more than compression: format choice, dimensions and metadata all affect weight and quality. Start here.',
+  'image-editing': 'Editing guides focused on the practical side — selection, export and the small checks that prevent re-uploading.',
+  'image-safety': 'What actually needs to be hidden before an image goes public, and how to verify it stayed hidden.',
+  'metadata': 'EXIF and embedded metadata can reveal location, device and timestamps. Learn what to strip before publishing.',
+  'bokeh': 'Bokeh versus blur: how the two differ, and how to fake a shallow depth of field after the shot.',
+  'grain-filter': 'Film grain adds texture and hides compression artifacts. These guides cover when grain helps and when it hurts.',
+  'car-photos': 'Photographing cars for listings, reviews or insurance — including how to handle plates and reflections.',
+  'film-look': 'Recreate a film look with grain, softness and color shifts without heavy editing software.',
+  'fix-blurry-photo': 'Why photos turn out blurry and what you can realistically recover afterwards.',
+  'batch-compression': 'Compressing many images at once: what to automate, what to check by hand.',
+  'batch-resize': 'Resizing sets of images for web, email or print without losing consistency.',
+  'ai-tools': 'Where AI image tools genuinely help, and where a simple browser-based editor is faster.',
+  'ai-image': 'AI-assisted image workflows explained without the hype.',
+  'ai-photo-enhancer': 'What AI enhancers can fix — and the cases where they make things worse.',
+};
+
+const blurb = blurbs[tag] || `Everything we have published about ${label}: step-by-step guides, checklists and comparisons written for people who need to publish an image safely and quickly.`;
+const description = `${posts.length} article${posts.length === 1 ? '' : 's'} about ${label} — practical guides for blurring, compressing and publishing images safely, all processed in your browser.`;
+---
+<Base
+  title={`${label} articles | Toolbox Image Blog`}
+  description={description.slice(0, 158)}
+  path={`/blog/tags/${tag}`}
+  lang="en"
+  altLang={null}
+  noindex={true}
+>
+  <section class="page-wrap">
+    <span class="eyebrow">TAG</span>
+    <h1>#{label}</h1>
+    <p class="lede">{blurb}</p>
+    <p class="lede">{posts.length} article{posts.length === 1 ? '' : 's'} in this collection.</p>
+    <div class="blog-grid">
+      {posts.map((post) => (
+        <article class="blog-card">
+          <time datetime={post.data.date.toISOString()}>{post.data.date.toISOString().slice(0, 10)}</time>
+          <h2><a href={`/blog/${post.slug}`}>{post.data.title}</a></h2>
+          <p>{post.data.description}</p>
+        </article>
+      ))}
+    </div>
+    <p style="margin-top:28px"><a class="button button-ghost" href="/blog">← All articles</a></p>
+  </section>
+</Base>

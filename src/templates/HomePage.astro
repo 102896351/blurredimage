@@ -1,0 +1,81 @@
+---
+import Base from '../layouts/Base.astro';
+import ImageEditor from '../components/ImageEditor.astro';
+import { t, type Lang } from '../i18n';
+
+interface Props { lang?: Lang }
+const { lang = 'en' } = Astro.props;
+const zh = lang === 'zh';
+const s = t[lang];
+const P = (p: string) => (zh ? `/zh${p}` : p);
+
+const privacyTools = zh
+  ? [['人脸', '/blur-face', '合照、活动照和社交图片'], ['文字', '/blur-text', '截图、订单号和敏感字段'], ['车牌', '/blur-license-plate', '车辆、街拍和二手车照片'], ['截图', '/blur-text', '后台、聊天和浏览器截图'], ['局部', '/blur-image', '画笔隐藏单个物体或区域'], ['像素化', '/blur-image', '让隐私区域清晰不可读'], ['背景', '/blur-image', '虚化房间、屏幕和杂乱环境'], ['敏感信息', '/privacy-blur', '证件、票据、表单和客户资料'], ['隐私检查', '/privacy-blur', '发布前逐项排查应隐藏内容'], ['分享前处理', '/privacy-blur', '人脸、屏幕、位置和标签一次处理']]
+  : [['faces', '/blur-face', 'Group photos, events and social images'], ['text', '/blur-text', 'Screenshots, order numbers and sensitive fields'], ['license plates', '/blur-license-plate', 'Vehicles, street shots and used-car photos'], ['screenshots', '/blur-text', 'Admin panels, chats and browser captures'], ['spots', '/blur-image', 'Brush to hide a single object or area'], ['pixels', '/blur-image', 'Make private areas unreadable'], ['backgrounds', '/blur-image', 'Soften rooms, screens and busy environments'], ['sensitive data', '/privacy-blur', 'IDs, receipts, forms and client records'], ['privacy checks', '/privacy-blur', 'Review what to hide before you post'], ['before sharing', '/privacy-blur', 'Faces, screens, locations and labels in one pass']];
+const dailyTools = zh
+  ? [['图片模糊', '/blur-image', '高斯、马赛克、噪点和遮盖'], ['图片压缩', '/compress-image', '降低 JPG、PNG、WebP 文件大小'], ['调整尺寸', '/resize-image', '按发布需求设置精确尺寸'], ['裁剪旋转', '/crop-rotate-image', '裁剪、旋转和翻转图片'], ['颗粒滤镜', '/media/grain-filter', '添加复古胶片颗粒质感'], ['视频帧提取', '/media/video-frame-extractor', '从视频中保存封面和静态帧']]
+  : [['Blur image', '/blur-image', 'Gaussian, mosaic, noise and cover'], ['Compress image', '/compress-image', 'Shrink JPG, PNG and WebP file sizes'], ['Resize image', '/resize-image', 'Exact sizes for publishing needs'], ['Crop & rotate', '/crop-rotate-image', 'Crop, rotate and flip images'], ['Grain filter', '/media/grain-filter', 'Add a vintage film-grain look'], ['Video frames', '/media/video-frame-extractor', 'Save covers and still frames from video']];
+
+const effects = zh
+  ? [['高斯模糊', '生成平滑自然的虚化效果，适合人像、产品图和背景虚化。'], ['像素模糊', '把细节变成块状像素，适合隐藏人脸、号码、文字或截图中的敏感区域。'], ['噪点遮盖', '用噪点打散可读内容，让截图和文档中的文字难以还原。'], ['完全遮盖', '用纯色块整块覆盖，适合必须彻底隐藏的证件和票据。']]
+  : [['Gaussian blur', 'Smooth, natural softness for portraits, product shots and backgrounds.'], ['Pixel blur', 'Turn detail into blocks — ideal for faces, numbers, text or sensitive screenshot areas.'], ['Noise cover', 'Scatter readable content with noise so text in screenshots and documents is hard to recover.'], ['Solid cover', 'Paint a flat block over anything that must be hidden completely, such as IDs and receipts.']];
+
+const designed = zh
+  ? [['下载前先预览', '所有修改实时显示，确认满意后再保存结果。'], ['精确控制模糊区域', '涂抹、矩形和套索三种方式，配合强度滑块。'], ['无需账号', '打开页面即可使用，不用注册或登录。'], ['干净结果下载', '导出的是处理后的图片副本，原图仍留在你的设备上。']]
+  : [['Preview before download', 'Every change shows live, so you save only when you are happy with it.'], ['Precise area control', 'Brush, rectangle and lasso selection plus a strength slider.'], ['No account needed', 'Open the page and start — no sign-up, no login.'], ['Clean downloads', 'You export a processed copy; the original stays on your device.']];
+
+const uses = zh
+  ? [['从任何图像创建时尚的背景', '/img/home/feature-1-800.webp', '将普通照片变成精致、抽象的背景，支持多种模糊效果，包括高斯模糊、像素模糊和柔和背景虚化，同时保留原始颜色与光线。'], ['用艺术性的模糊唤起情感', '/img/home/feature-2-800.webp', '模糊不仅仅是一个滤镜；它是一种强大的艺术表达工具。为风景添加柔和的薄雾，营造梦幻、空灵的质感，或为肖像赋予柔和的光晕，以唤起温暖和怀旧之情。'], ['用预告图片制造悬念', '/img/home/feature-3-800.webp', '要发布新产品吗？要宣布一个大惊喜吗？使用模糊的图片立即吸引注意力并建立期待感。这是一种经典的营销技巧，可以营造一种神秘感，让观众对即将到来的事物感到兴奋。'], ['通过隐藏敏感细节安全分享', '/img/home/feature-4-800.webp', '需要展示屏幕截图或文档而不暴露敏感信息吗？我们的模糊工具允许您遮蔽整个图像，在保留上下文的同时隐藏私人数据。这是安全演示概念或用户界面的理想方式。']]
+  : [['Create stylish backgrounds from any image', '/img/home/feature-1-800.webp', 'Turn ordinary photos into refined, abstract backdrops with several blur styles — Gaussian, pixel and soft background blur — while keeping the original color and light.'], ['Evoke emotion with artistic blur', '/img/home/feature-2-800.webp', 'Blur is more than a filter — it is a powerful expressive tool. Add soft haze to landscapes for a dreamy feel, or a gentle glow to portraits for warmth and nostalgia.'], ['Build suspense with teaser images', '/img/home/feature-3-800.webp', 'Launching a product or a big surprise? Blurred images grab attention and build anticipation — a classic marketing trick that keeps your audience excited about what is coming.'], ['Share safely by hiding sensitive details', '/img/home/feature-4-800.webp', 'Need to show a screenshot or document without exposing private data? Our blur tool lets you mask the whole image while keeping context — ideal for safely presenting concepts and UIs.']];
+
+const guides = [
+  { slug: 'blur-face-online-guide', zh: ['如何模糊人脸保护隐私', '在群照、活动、商品图和社交图片中保护身份，同时保留画面语境。'], en: ['How to blur faces for privacy', 'Protect identities in group, event, product and social images while keeping context.'] },
+  { slug: 'how-to-blur-text-in-image', zh: ['如何模糊图片中的文字', '了解分享截图、文档和隐私图片前应该隐藏哪些文字。'], en: ['How to blur text in an image', 'Learn which text to hide before sharing screenshots, documents and private images.'] },
+  { slug: 'box-select-and-freehand-blur-online', zh: ['框选模糊与手绘模糊', '比较矩形框选和手绘模糊，选择更适合精确隐藏细节的方式。'], en: ['Box select vs freehand blur', 'Compare rectangle and freehand blur to pick the precise way to hide details.'] },
+];
+
+const faqs = zh
+  ? [['图片会上传到服务器吗？', '普通编辑使用浏览器 Canvas 本地处理，图片不会作为正常编辑流程自动上传。'], ['单张图片免费吗？', '单张图片模糊、压缩和常用编辑功能免费使用，无需注册。'], ['如何隐藏车牌和人脸？', '上传图片后使用涂抹、矩形或套索选择完整区域，再选择高斯模糊或像素化。'], ['手机上可以使用吗？', '可以。页面支持现代手机浏览器和触摸操作。']]
+  : [['Are images uploaded to a server?', 'Everyday edits run locally in the browser via Canvas — images are never auto-uploaded as part of the normal workflow.'], ['Is it free for single images?', 'Yes. Blurring, compressing and everyday edits are free for single images, no sign-up required.'], ['How do I hide plates and faces?', 'Upload an image, select the full area with the brush, rectangle or lasso, then pick Gaussian blur or pixelation.'], ['Does it work on mobile?', 'Yes. Pages support modern mobile browsers and touch input.']];
+const homeSchema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      name: zh ? 'Toolbox Image 在线图片模糊工具' : 'Toolbox Image — online image blur tool',
+      url: zh ? 'https://img.toolbox168.xyz/zh/' : 'https://img.toolbox168.xyz/',
+      description: zh ? '在浏览器中模糊人脸、文字、车牌和截图，并支持压缩、调整尺寸与裁剪，图片默认留在设备上。' : 'Blur faces, text, license plates and screenshots in your browser, plus compress, resize and crop. Files stay on your device by default.',
+      applicationCategory: 'UtilitiesApplication',
+      operatingSystem: 'Any (runs in a modern web browser)',
+      browserRequirements: 'Requires JavaScript and HTML5 Canvas',
+      inLanguage: zh ? 'zh-CN' : 'en',
+      isAccessibleForFree: true,
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      featureList: ['Gaussian blur', 'Pixelation', 'Noise cover', 'Solid cover', 'Image compression', 'Resize', 'Crop and rotate'],
+      publisher: { '@type': 'Organization', name: 'Toolbox Image', url: 'https://img.toolbox168.xyz' },
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
+    },
+  ],
+};
+---
+<Base title={zh ? '免费在线图片工具 | Toolbox Image' : 'Free Online Image Tools | Toolbox Image'} description={zh ? '在浏览器中免费模糊人脸、文字、车牌和截图，压缩图片、调整尺寸、裁剪旋转，图片默认留在设备上。' : 'Blur faces, text, license plates and screenshots for free in your browser. Compress, resize and crop images — everything stays on your device by default.'} path="/" lang={lang} schema={homeSchema} preloadBanner={true}>
+  <section class="hero-banner"><div class="hero-inner"><span class="eyebrow">{zh ? '图片模糊 · 本地处理 · 免费' : 'IMAGE BLUR · LOCAL · FREE'}</span><h1>{zh ? <>免费在线<span class="brand-accent">图片模糊</span>工具，分享前更安心</> : <>Free online <span class="brand-accent">image blur</span>, share with confidence</>}</h1><p>{zh ? '一键模糊人脸、文字、车牌和截图，压缩图片，调整尺寸，全部在浏览器内完成。单张图片无需注册。' : 'Blur faces, text, plates and screenshots in one click. Compress, resize and crop — all in your browser. Single images need no sign-up.'}</p><div class="hero-actions"><a class="button button-primary" href={P('/blur-image')}>{zh ? '图片模糊 →' : 'Blur an image →'}</a><a class="button button-ghost" href={P('/tools')}>{zh ? '浏览全部工具' : 'Browse all tools'}</a></div><div class="trust-row"><span>✓ {zh ? '本地处理' : 'Runs locally'}</span><span>✓ {zh ? '无需注册' : 'No sign-up'}</span><span>✓ PNG / JPG / WebP</span></div></div></section>
+  <ImageEditor lang={lang} />
+  <section class="section-heading"><span class="eyebrow">PRIVACY TOOLS</span><h2>{zh ? '图片隐私处理' : 'Image privacy tools'}</h2><p>{zh ? '发布照片、截图或文档前，先隐藏不想公开的细节。' : 'Hide details you don\u2019t want public before posting photos, screenshots or documents.'}</p></section>
+  <section class="tool-grid privacy-grid">{privacyTools.map(([name, href, text], index) => <a class="tool-card compact-card" href={P(href)}><span class="tool-number">{index + 1 < 10 ? `0${index + 1}` : String(index + 1)}</span><h3>{zh ? `在线模糊${name}` : `Blur ${name} online`}</h3><p>{text}</p><strong>{s.openTool} →</strong></a>)}</section>
+  <section class="section-heading"><span class="eyebrow">BLUR EFFECTS</span><h2>{zh ? '支持的多种模糊效果' : 'Blur effects you can apply'}</h2><p>{zh ? '根据用途选择效果：自然虚化、隐藏可读信息，或整块遮盖。' : 'Pick the effect that fits: natural softness, hiding readable detail, or full coverage.'}</p></section>
+  <section class="tool-grid">{effects.map(([name, text]) => <article class="tool-card"><strong>{zh ? '效果' : 'EFFECT'}</strong><h3>{name}</h3><p>{text}</p></article>)}</section>
+  <section class="section-heading"><span class="eyebrow">CREATIVE USES</span><h2>{zh ? '不止是打码：模糊的更多用法' : 'More than redaction: creative uses of blur'}</h2><p>{zh ? '从设计背景到发布预告，模糊也是常用视觉手法。' : 'From design backdrops to launch teasers, blur is a everyday visual technique.'}</p></section>
+  <section class="use-cards">{uses.map(([name, img, text], i) => <article class={'use-card' + (i % 2 === 1 ? ' use-card-flip' : '')}><div class="use-media"><img src={img} alt={name} loading="lazy" width="800" height="450" /></div><div class="use-body"><h3>{name}</h3><p>{text}</p></div></article>)}</section>
+  <section class="section-heading"><span class="eyebrow">DAILY IMAGE TOOLS</span><h2>{zh ? '快速日常编辑' : 'Quick everyday edits'}</h2><p>{zh ? '从压缩和尺寸调整，到创意效果和视频素材整理。' : 'From compression and resizing to creative effects and media prep.'}</p></section>
+  <section class="tool-grid">{dailyTools.map(([name, href, text]) => <a class="tool-card" href={P(href)}><strong>TOOL</strong><h3>{name}</h3><p>{text}</p></a>)}</section>
+  <section class="section-heading"><span class="eyebrow">DESIGNED FOR CAREFUL REDACTION</span><h2>{zh ? '为谨慎的图片打码而设计' : 'Designed for careful redaction'}</h2><p>{zh ? '每一步都让你先看清楚再保存，避免误发不该公开的内容。' : 'Every step lets you check before saving, so nothing sensitive slips out.'}</p></section>
+  <section class="tool-grid">{designed.map(([name, text]) => <article class="tool-card"><strong>{zh ? '特性' : 'FEATURE'}</strong><h3>{name}</h3><p>{text}</p></article>)}</section>
+  <section class="section-heading"><span class="eyebrow">GUIDES</span><h2>{zh ? '分享图片前，学习更安全的编辑方式' : 'Learn safer editing before you share'}</h2><p>{zh ? '按场景阅读指南：模糊人脸、隐藏截图文字、选择框选或手绘。' : 'Guides by scenario: blur faces, hide screenshot text, choose box or freehand.'}</p></section>
+  <section class="tool-grid">{guides.map((g) => <a class="tool-card" href={`/blog/${g.slug}`}><strong>{zh ? '指南' : 'GUIDE'}</strong><h3>{zh ? g.zh[0] : g.en[0]}</h3><p>{zh ? g.zh[1] : g.en[1]}</p><span class="card-link">{zh ? '阅读指南 →' : 'Read guide →'}</span></a>)}</section>
+  <section class="how-section"><div><span class="eyebrow">HOW IT WORKS</span><h2>{zh ? '三步完成图片处理' : 'Blur images in three steps'}</h2><p>{zh ? '打开工具，上传文件，预览并下载。无需复杂设置。' : 'Open a tool, upload a file, preview and download. No complicated setup.'}</p></div><div class="steps"><article><b>01</b><h3>{zh ? '上传图片' : 'Upload an image'}</h3><p>{zh ? '点击选择、拖拽图片，或在支持的页面中粘贴图片。' : 'Click, drag and drop, or paste an image on supported pages.'}</p></article><article><b>02</b><h3>{zh ? '调整效果' : 'Adjust the effect'}</h3><p>{zh ? '选择区域、效果、强度和导出格式，实时检查预览。' : 'Pick the area, effect, strength and export format while checking the live preview.'}</p></article><article><b>03</b><h3>{zh ? '下载结果' : 'Download the result'}</h3><p>{zh ? '保存干净的图片副本，原图仍保留在你的设备中。' : 'Save a clean copy — the original stays on your device.'}</p></article></div></section>
+  <section class="faq-section"><div class="section-heading left-heading"><span class="eyebrow">FAQ</span><h2>{zh ? '常见问题' : 'Frequently asked questions'}</h2></div><div class="faq-list">{faqs.map(([q, a]) => <details><summary>{q}</summary><p>{a}</p></details>)}</div></section>
+</Base>

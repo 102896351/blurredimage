@@ -1,0 +1,7 @@
+# Google AdSense ads.txt
+# ---------------------------------------------------------------
+# BEFORE APPLYING: replace pub-0000000000000000 with your real
+# AdSense publisher ID (it looks like pub-1234567890123456).
+# The f08c47fec0942fa0 string is Google's fixed DIRECT tag — keep it.
+# ---------------------------------------------------------------
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

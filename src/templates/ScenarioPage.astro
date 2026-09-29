@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import RegionBlurTool from '../components/RegionBlurTool.astro';
+import ToolContent from '../components/ToolContent.astro';
+import { type Lang } from '../i18n';
+
+interface Props { lang?: Lang; slug: string }
+const { lang = 'en', slug } = Astro.props;
+const zh = lang === 'zh';
+
+const labels = {
+  en: {
+    'blur-license-plate': ['Blur license plates online', 'Hide the full plate area before publishing car photos, used-car listings or street scenes, with a local image tool.'],
+    'blur-face': ['Blur faces online', 'Blur faces, people and identity details in photos inside your browser — perfect for social images, event photos and public posts.'],
+    'blur-text': ['Blur text in images online', 'Blur names, addresses, accounts, order numbers and other sensitive text in screenshots, documents and chat images.'],
+  },
+  zh: {
+    'blur-license-plate': ['在线模糊车牌', '发布汽车照片、二手车图片或街景前，使用本地图片工具隐藏完整车牌区域。'],
+    'blur-face': ['在线模糊人脸', '在浏览器内模糊照片中的人脸、人物和身份细节，适合社交图片、活动照片和公开发布。'],
+    'blur-text': ['在线模糊图片文字', '在截图、文档和聊天图片中模糊姓名、地址、账号、订单号和其他敏感文字。'],
+  },
+} as const;
+const [heading, description] = labels[lang][slug as keyof typeof labels['en']];
+const path = `/${slug}`;
+---
+<Base title={`${heading} | Toolbox Image`} description={description} path={path} lang={lang} preloadBanner={true}>
+  <section class="page-banner"><div class="page-banner-inner"><span class="eyebrow">PRIVACY SCENARIO</span><h1>{heading}</h1><p class="lede">{description}</p></div></section>
+  <RegionBlurTool lang={lang} />
+  <ToolContent lang={lang} tool={slug as 'blur-face' | 'blur-text' | 'blur-license-plate'} />
+</Base>

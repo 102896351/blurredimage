@@ -1,0 +1,15 @@
+---
+import { type Lang } from '../i18n';
+interface Props { lang?: Lang }
+const { lang = 'en' } = Astro.props;
+const zh = lang === 'zh';
+---
+<section class="special-tool media-status">
+  <div class="special-head"><div><span class="eyebrow">MEDIA TOOL</span><h2>{zh ? '专用媒体工作台准备中' : 'Dedicated media workbench in progress'}</h2><p>{zh ? 'GIF、视频和帧提取需要专用的解码流程，不会用普通图片编辑器代替。' : 'GIF, video and frame extraction need dedicated decoding pipelines — a plain image editor will not stand in for them.'}</p></div></div>
+  <div class="media-plan">
+    <article><strong>{zh ? 'GIF 模糊' : 'GIF blur'}</strong><p>{zh ? '逐帧应用模糊区域并重新编码 GIF。' : 'Apply blur areas frame by frame and re-encode the GIF.'}</p></article>
+    <article><strong>{zh ? '视频模糊' : 'Video blur'}</strong><p>{zh ? '短视频关键帧区域跟踪、时间范围和导出。' : 'Keyframe area tracking, time ranges and export for short videos.'}</p></article>
+    <article><strong>{zh ? '视频帧提取' : 'Video frame extraction'}</strong><p>{zh ? '按时间点或间隔提取高清 PNG 帧。' : 'Extract high-resolution PNG frames by time point or interval.'}</p></article>
+  </div>
+  <p class="editor-status">{zh ? <>在此之前，你可以先使用 <a href="/zh/blur-image">整图模糊</a> 或 <a href="/zh/blur-license-plate">局部涂抹</a> 处理静态图片。</> : <>In the meantime, use <a href="/blur-image">full-image blur</a> or <a href="/blur-license-plate">manual brushing</a> for static images.</>}</p>
+</section>

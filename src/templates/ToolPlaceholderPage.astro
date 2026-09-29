@@ -1,0 +1,13 @@
+---
+import Base from '../layouts/Base.astro';
+import { type Lang } from '../i18n';
+interface Props { lang?: Lang }
+const { lang = 'en' } = Astro.props;
+const zh = lang === 'zh';
+const heading = zh ? '在线图片工具' : 'Online image tool';
+const description = zh ? '在浏览器中处理图片，本地完成，无需上传。' : 'Process images in your browser — local, private, no uploads.';
+---
+<Base title={`${heading} | Toolbox Image`} description={description} path="/tool-placeholder" lang={lang} noindex={true} preloadBanner={true}>
+  <section class="page-banner"><div class="page-banner-inner"><span class="eyebrow">IMAGE TOOL</span><h1>{heading}</h1><p class="lede">{description}</p><a class="button button-primary" href={zh ? '/zh/blur-image' : '/blur-image'}>{zh ? '打开图片编辑器 →' : 'Open the image editor →'}</a></div></section>
+  <section class="page-wrap"><div class="content-card"><h2>{zh ? '浏览器内处理' : 'In-browser processing'}</h2><p>{zh ? '首版工具共享同一个本地 Canvas 编辑器，图片不会自动上传。上传后可以继续调整效果、尺寸和导出格式。' : 'The first version of every tool shares the same local Canvas editor — images are never auto-uploaded. After uploading you can keep adjusting effects, size and export format.'}</p><h2>{zh ? '即将支持' : 'Coming soon'}</h2><p>{zh ? '压缩、尺寸调整、裁剪旋转和自动隐私检测将作为独立工作流加入，编辑结果仍然可以通过本地下载保存。' : 'Compression, resizing, crop & rotate and smart privacy detection will arrive as dedicated workflows — results still save locally via download.'}</p></div></section>
+</Base>

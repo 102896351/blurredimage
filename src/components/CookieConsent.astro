@@ -1,0 +1,56 @@
+---
+/**
+ * Cookie consent banner (EEA/GDPR requirement for Google AdSense).
+ * Until the visitor chooses, no advertising script is loaded.
+ * Choice is stored in localStorage under 'tb-consent'.
+ */
+---
+<div class="cookie-bar" id="cookie-bar" hidden>
+  <p>We use cookies to measure traffic and show ads. You can accept or decline — declining keeps the tools fully usable. Read our <a href="/cookie">Cookie Policy</a> and <a href="/privacy">Privacy Policy</a>.</p>
+  <div class="cookie-actions">
+    <button type="button" id="cookie-decline">Decline</button>
+    <button type="button" id="cookie-accept" class="primary">Accept</button>
+  </div>
+</div>
+<script is:inline>
+  (function () {
+    try {
+      var KEY = 'tb-consent';
+      var bar = document.getElementById('cookie-bar');
+      if (!bar) return;
+      var current = localStorage.getItem(KEY);
+      document.documentElement.setAttribute('data-consent', current || 'unknown');
+      if (!current) {
+        bar.hidden = false;
+        document.getElementById('cookie-accept').addEventListener('click', function () {
+          localStorage.setItem(KEY, 'granted');
+          document.documentElement.setAttribute('data-consent', 'granted');
+          bar.hidden = true;
+          window.dispatchEvent(new CustomEvent('tb-consent', { detail: 'granted' }));
+          activate();
+        });
+        document.getElementById('cookie-decline').addEventListener('click', function () {
+          localStorage.setItem(KEY, 'denied');
+          document.documentElement.setAttribute('data-consent', 'denied');
+          bar.hidden = true;
+        });
+      }
+    } catch (e) {}
+  })();
+
+  // Gate deferred scripts (ads / analytics) behind consent.
+  function activate() {
+    document.querySelectorAll('[data-consent-gate]').forEach(function (el) {
+      if (el.dataset.loaded === '1') return;
+      el.dataset.loaded = '1';
+      var s = document.createElement('script');
+      if (el.dataset.src) s.src = el.dataset.src;
+      else s.textContent = el.textContent;
+      s.async = true;
+      (document.head || document.body).appendChild(s);
+    });
+  }
+  (function () {
+    try { if (localStorage.getItem('tb-consent') === 'granted') activate(); } catch (e) {}
+  })();
+</script>

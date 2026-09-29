@@ -1,0 +1,8 @@
+---
+import ScenarioPage from '../../templates/ScenarioPage.astro';
+export function getStaticPaths() {
+  return ['blur-license-plate','blur-face','blur-text'].map((slug) => ({ params: { slug } }));
+}
+const { slug } = Astro.params;
+---
+<ScenarioPage lang="zh" slug={slug} />

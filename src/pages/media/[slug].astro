@@ -1,0 +1,8 @@
+---
+import MediaPage from '../../templates/MediaPage.astro';
+export function getStaticPaths() {
+  return ['grain-filter','video-frame-extractor','blur-gif-online','blur-video-online'].map((slug) => ({ params: { slug } }));
+}
+const { slug } = Astro.params;
+---
+<MediaPage lang="en" slug={slug} />

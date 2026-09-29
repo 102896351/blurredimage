@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import PrivacyDetectTool from '../components/PrivacyDetectTool.astro';
+import ToolContent from '../components/ToolContent.astro';
+import { type Lang } from '../i18n';
+interface Props { lang?: Lang }
+const { lang = 'en' } = Astro.props;
+const zh = lang === 'zh';
+const heading = zh ? '自动隐私图片处理' : 'Automatic privacy blur';
+const description = zh ? '识别潜在的人脸、车牌和文字区域，确认后应用模糊或马赛克。' : 'Detect candidate faces, plates and text areas, confirm, then apply blur or mosaic.';
+---
+<Base title={`${heading} | Toolbox Image`} description={description} path="/privacy-blur" lang={lang} preloadBanner={true}>
+  <section class="page-banner"><div class="page-banner-inner"><span class="eyebrow">SMART PRIVACY</span><h1>{heading}</h1><p class="lede">{description}</p></div></section><PrivacyDetectTool lang={lang} /><ToolContent lang={lang} tool="privacy-blur" />
+</Base>

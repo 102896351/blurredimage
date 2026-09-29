@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Tag archive pages exist for navigation but are set to noindex in-page.
+# They stay crawlable so internal links still work.
+
+Sitemap: https://img.toolbox168.xyz/sitemap-index.xml

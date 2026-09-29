@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+import MediaComingSoon from '../components/MediaComingSoon.astro';
+import { type Lang } from '../i18n';
+
+interface Props { lang?: Lang; slug: string }
+const { lang = 'en', slug } = Astro.props;
+const zh = lang === 'zh';
+
+const pages = {
+  en: {
+    'grain-filter': ['Grain filter online', 'Add a vintage film-grain effect to photos — great for portraits, social posts and creative visuals.'],
+    'video-frame-extractor': ['Video frame extractor online', 'Extract covers, tutorial frames and reference stills from video.'],
+    'blur-gif-online': ['Blur GIFs online', 'Blur faces, captions, usernames and private details in animated GIFs.'],
+    'blur-video-online': ['Blur video online', 'Add editable blur areas to short videos to hide faces, text and plates.'],
+  },
+  zh: {
+    'grain-filter': ['在线颗粒滤镜', '给照片添加复古胶片颗粒效果，适合人像、社交帖子和创意视觉。'],
+    'video-frame-extractor': ['在线视频转帧', '从视频中提取封面、教程画面和参考帧。'],
+    'blur-gif-online': ['在线模糊 GIF', '对动图中的人脸、字幕、用户名和隐私细节进行处理。'],
+    'blur-video-online': ['在线视频模糊', '在短视频中添加可编辑的模糊区域，隐藏人脸、文字和车牌。'],
+  },
+} as const;
+const [title, description] = pages[lang][slug as keyof typeof pages['en']];
+const path = `/media/${slug}`;
+---
+<Base title={`${title} | Toolbox Image`} description={description} path={path} lang={lang} noindex={true} preloadBanner={true}>
+  <section class="page-banner"><div class="page-banner-inner"><span class="eyebrow">CREATIVE & MEDIA</span><h1>{title}</h1><p class="lede">{description}</p></div></section>
+  <MediaComingSoon lang={lang} />
+  <section class="page-wrap"><div class="content-card"><h2>{zh ? '浏览器内处理' : 'In-browser processing'}</h2><p>{zh ? '这是独立的工具入口。当前共享本地图片编辑器，后续会针对颗粒、视频帧、GIF 和视频建立专用处理流程。' : 'This is a standalone tool entry. It currently shares the local image editor; dedicated pipelines for grain, video frames, GIF and video are coming.'}</p></div></section>
+</Base>

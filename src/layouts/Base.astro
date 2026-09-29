@@ -1,0 +1,192 @@
+---
+import '../styles/global.css';
+import { t, site, type Lang } from '../i18n';
+import { GA_MEASUREMENT_ID, GOOGLE_SITE_VERIFICATION } from '../config';
+import CookieConsent from '../components/CookieConsent.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path without language prefix, e.g. '/tools' or '/blur-face'. Root = '/'. */
+  path?: string;
+  lang?: Lang;
+  /** Alternate-language URL. Pass null on English-only pages so no hreflang is emitted (never point at a 404). */
+  altLang?: string | null;
+  /** Set true on thin/archival pages (tag archives) to keep them out of Google's index. */
+  noindex?: boolean;
+  /** JSON-LD object (or array) rendered into the head. */
+  schema?: object | object[];
+  /** Absolute or root-relative social preview image. Defaults to the site OG cover. */
+  ogImage?: string;
+  /** Preload the hero banner image (banner above the fold = LCP element). */
+  preloadBanner?: boolean;
+}
+
+const {
+  title,
+  description,
+  path: basePath = '/',
+  lang = 'en',
+  altLang,
+  noindex = false,
+  schema,
+  ogImage = '/img/og-cover.jpg',
+  preloadBanner = false,
+} = Astro.props;
+
+const p = basePath === '/' ? '' : basePath;
+const canonical = lang === 'zh' ? `${site}/zh${p || '/'}` : `${site}${p || '/'}`;
+const enUrl = `${site}${p || '/'}`;
+const zhUrl = `${site}/zh${p || '/'}`;
+const s = t[lang];
+const zh = lang === 'zh';
+
+// English-only pages (legal pages, blog posts, tag archives) must not declare a
+// Chinese alternate that does not exist — the switcher falls back to a real page.
+const hasAlt = altLang !== null;
+const altUrl = hasAlt ? (zh ? enUrl : (altLang || zhUrl)) : '';
+const selfUrl = canonical;
+const altLangCode = zh ? 'en' : 'zh-CN';
+
+// Internal links: bilingual pages get a /zh prefix; English-only pages stay at root.
+const L = (path: string, bilingual = true) => (zh && bilingual ? `/zh${path}` : path);
+// Blog posts have no Chinese version -> Chinese switch lands on the zh blog list.
+// Legal pages have no Chinese version -> land on the zh home.
+const isBlogPost = basePath.startsWith('/blog/');
+const isTagPage = basePath.startsWith('/blog/tags');
+const zhHref = isBlogPost || isTagPage ? '/zh/blog' : hasAlt ? altUrl.replace(site, '') || '/zh/' : '/zh/';
+
+const ogImageUrl = ogImage.startsWith('http') ? ogImage : site + ogImage;
+const robotsContent = noindex ? 'noindex, follow' : 'index, follow, max-image-preview:large';
+const defaultSchema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      name: 'Toolbox Image',
+      url: site,
+      inLanguage: zh ? 'zh-CN' : 'en',
+      description: 'Free browser-based image tools: blur faces, text, license plates and screenshots, plus compress, resize and crop.',
+    },
+    {
+      '@type': 'Organization',
+      name: 'Toolbox Image',
+      url: site,
+      logo: site + '/img/logo-512.png',
+      email: 'yangkunming2026@gmail.com',
+      sameAs: ['https://toolbox168.xyz'],
+    },
+  ],
+};
+const schemaJson = JSON.stringify(schema ?? defaultSchema);
+---
+<!doctype html>
+<html lang={zh ? 'zh-CN' : 'en'}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="robots" content={robotsContent} />
+    {GOOGLE_SITE_VERIFICATION && <meta name="google-site-verification" content={GOOGLE_SITE_VERIFICATION} />}
+    <link rel="canonical" href={canonical} />
+    {hasAlt && <link rel="alternate" hreflang={altLangCode} href={altUrl} />}
+    {hasAlt && <link rel="alternate" hreflang={zh ? 'zh-CN' : 'en'} href={selfUrl} />}
+    {hasAlt && <link rel="alternate" hreflang="x-default" href={enUrl} />}
+
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Toolbox Image" />
+    <meta property="og:locale" content={zh ? 'zh_CN' : 'en_US'} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    {preloadBanner && <link rel="preload" as="image" href="/img/home/banner-1600.webp" fetchpriority="high" />}
+
+    <title>{title}</title>
+    <script type="application/ld+json" set:html={schemaJson} />
+
+    {GA_MEASUREMENT_ID && (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}></script>
+        <script is:inline define:vars={{ id: GA_MEASUREMENT_ID }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag() { dataLayer.push(arguments); }
+          gtag('js', new Date());
+          gtag('config', id, { anonymize_ip: true });
+        </script>
+      </>
+    )}
+
+    <script is:inline>
+      // Auto language detection: CN visitors -> /zh/, others -> root (English).
+      // Runs only on external entries; a manual switch stores 'tb-lang' and wins forever.
+      (function () {
+        try {
+          if (localStorage.getItem('tb-lang')) return;
+          var external = !document.referrer || document.referrer.indexOf(location.host) === -1;
+          if (!external) return;
+          var isZh = location.pathname.indexOf('/zh') === 0;
+          var path = location.pathname.replace(/^\/zh(?=\/|$)/, '') || '/';
+          fetch('/cdn-cgi/trace').then(function (r) { return r.text(); }).then(function (txt) {
+            var m = /loc=([A-Z]{2})/.exec(txt);
+            var cn = m ? m[1] === 'CN' : (navigator.language || '').toLowerCase().indexOf('zh') === 0;
+            localStorage.setItem('tb-lang', cn ? 'zh' : 'en');
+            if (cn && !isZh) location.replace('/zh' + path);
+          }).catch(function () {});
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href={L('/')} aria-label={s.homeAria}><img class="brand-mark" src="/img/logo.webp" width="32" height="32" alt="Toolbox Image logo" /><span>Toolbox<span class="brand-accent">Image</span></span></a>
+      <nav aria-label={s.navAria}>
+        <a href={L('/')}>{s.navBlur}</a>
+        <div class="nav-drop">
+          <button class="nav-drop-btn" type="button" aria-haspopup="true">{s.navTools}<svg class="caret" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="nav-menu">
+            <a href={L('/blur-image')}>{s.menuBlurImage}</a>
+            <a href={L('/blur-face')}>{s.menuBlurFace}</a>
+            <a href={L('/blur-text')}>{s.menuBlurText}</a>
+            <a href={L('/blur-license-plate')}>{s.menuBlurPlate}</a>
+            <a href={L('/privacy-blur')}>{s.menuPrivacy}</a>
+            <a href={L('/compress-image')}>{s.menuCompress}</a>
+            <a href={L('/resize-image')}>{s.menuResize}</a>
+            <a href={L('/crop-rotate-image')}>{s.menuCrop}</a>
+          </div>
+        </div>
+        <a href={L('/blog', false)}>{s.navBlog}</a>
+        <a href={L('/privacy-blur')}>{s.navPrivacy}</a>
+        <a href={L('/about', false)}>{s.navAbout}</a>
+      </nav>
+      <div class="lang-switch" aria-label="Language">
+        <a href={p || '/'} class={lang === 'en' ? 'active' : ''} onclick="localStorage.setItem('tb-lang','en')">English</a>
+        <a href={zhHref} class={zh ? 'active' : ''} onclick="localStorage.setItem('tb-lang','zh')">中文</a>
+      </div>
+    </header>
+    <main><slot /></main>
+    <CookieConsent />
+    <footer class="site-footer">
+      <div><strong>Toolbox Image</strong><p>{s.footerTag} yangkunming2026@gmail.com</p></div>
+      <div class="footer-links">
+        <a href={L('/tools')}>{s.fTools}</a>
+        <a href={L('/blog', false)}>{s.fBlog}</a>
+        <a href={L('/support', false)}>{s.fSupport}</a>
+        <a href={L('/about', false)}>{s.fAbout}</a>
+        <a href={L('/privacy', false)}>{s.fPrivacy}</a>
+        <a href={L('/cookie', false)}>{s.fCookie}</a>
+        <a href={L('/terms', false)}>{s.fTerms}</a>
+      </div>
+      <p class="copyright">© 2026 Toolbox Image · Powered by toolbox168.xyz</p>
+    </footer>
+  </body>
+</html>

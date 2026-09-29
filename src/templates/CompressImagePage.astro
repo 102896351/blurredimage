@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import CompressTool from '../components/CompressTool.astro';
+import ToolContent from '../components/ToolContent.astro';
+import { type Lang } from '../i18n';
+interface Props { lang?: Lang }
+const { lang = 'en' } = Astro.props;
+const zh = lang === 'zh';
+const heading = zh ? '在线压缩图片' : 'Compress images online';
+const description = zh ? '在浏览器中压缩 JPG、PNG 和 WebP，调整质量和尺寸以减小文件大小。' : 'Compress JPG, PNG and WebP in your browser — adjust quality and size to shrink files.';
+---
+<Base title={`${heading} | Toolbox Image`} description={description} path="/compress-image" lang={lang} preloadBanner={true}>
+  <section class="page-banner"><div class="page-banner-inner"><span class="eyebrow">IMAGE COMPRESSION</span><h1>{heading}</h1><p class="lede">{description}</p></div></section><CompressTool lang={lang} /><ToolContent lang={lang} tool="compress-image" />
+</Base>

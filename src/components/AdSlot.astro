@@ -1,0 +1,33 @@
+---
+import { ADSENSE_CLIENT } from '../config';
+
+interface Props {
+  /** AdSense ad unit slot id (numeric string from your ad unit). */
+  slot?: string;
+  /** Visible placeholder text used while no client/slot is configured. */
+  label?: string;
+}
+const { slot = '', label = '' } = Astro.props;
+const enabled = ADSENSE_CLIENT.length > 0 && slot.length > 0;
+const src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
+---
+{
+  enabled && (
+    <div class="ad-slot">
+      {/* Loaded only after the visitor accepts cookies — see CookieConsent. */}
+      <script type="text/plain" data-consent-gate="ads" data-src={src} async crossorigin="anonymous"></script>
+      <ins
+        class="adsbygoogle"
+        style="display:block"
+        data-ad-client={ADSENSE_CLIENT}
+        data-ad-slot={slot}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      ></ins>
+      <script type="text/plain" data-consent-gate="ads">(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  )
+}
+{
+  !enabled && label && <div class="ad-slot placeholder" aria-hidden="true">{label}</div>
+}

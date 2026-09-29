@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import ResizeTool from '../components/ResizeTool.astro';
+import ToolContent from '../components/ToolContent.astro';
+import { type Lang } from '../i18n';
+interface Props { lang?: Lang }
+const { lang = 'en' } = Astro.props;
+const zh = lang === 'zh';
+const heading = zh ? '在线调整图片尺寸' : 'Resize images online';
+const description = zh ? '按宽度、高度、比例和最长边调整图片尺寸，适合发布、上传和社交平台。' : 'Resize by width, height, ratio and longest side — ready for publishing, uploads and social platforms.';
+---
+<Base title={`${heading} | Toolbox Image`} description={description} path="/resize-image" lang={lang} preloadBanner={true}>
+  <section class="page-banner"><div class="page-banner-inner"><span class="eyebrow">IMAGE RESIZER</span><h1>{heading}</h1><p class="lede">{description}</p></div></section><ResizeTool lang={lang} /><ToolContent lang={lang} tool="resize-image" />
+</Base>

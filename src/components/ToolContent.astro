@@ -1,0 +1,67 @@
+---
+import { toolContent, type Lang } from '../toolContent';
+import { ADSENSE_SLOTS } from '../config';
+import AdSlot from './AdSlot.astro';
+
+interface Props {
+  lang?: Lang;
+  tool: keyof typeof toolContent;
+  /** Overrides used for the WebApplication schema node. */
+  name?: string;
+  description?: string;
+}
+const { lang = 'en', tool, name, description } = Astro.props;
+const zh = lang === 'zh';
+const c = toolContent[tool as string][lang];
+const P = (href: string) => (zh && !href.startsWith('/zh') ? `/zh${href}` : href);
+const SITE = 'https://img.toolbox168.xyz';
+const pageUrl = new URL(Astro.url.pathname, SITE).href;
+const appName = name || c.howto.title;
+const appDesc = description || `${c.howto.title}. ${c.howto.sub}`;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebApplication',
+      name: appName,
+      url: pageUrl,
+      description: appDesc,
+      applicationCategory: 'UtilitiesApplication',
+      operatingSystem: 'Any (runs in a modern web browser)',
+      browserRequirements: 'Requires JavaScript and HTML5 Canvas',
+      inLanguage: zh ? 'zh-CN' : 'en',
+      isAccessibleForFree: true,
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+      publisher: { '@type': 'Organization', name: 'Toolbox Image', url: SITE },
+    },
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: zh ? '首页' : 'Home', item: SITE + '/' },
+        { '@type': 'ListItem', position: 2, name: zh ? '全部工具' : 'All tools', item: SITE + (zh ? '/zh/tools' : '/tools') },
+        { '@type': 'ListItem', position: 3, name: appName, item: pageUrl },
+      ],
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: c.faq.map((qa) => ({
+        '@type': 'Question',
+        name: qa.q,
+        acceptedAnswer: { '@type': 'Answer', text: qa.a },
+      })),
+    },
+  ],
+};
+---
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
+<section class="tc-wrap"><div class="tc-howto"><div class="tc-howto-head"><span class="eyebrow">{zh ? '使用教程' : 'HOW IT WORKS'}</span><h2>{c.howto.title}</h2><p>{c.howto.sub}</p></div><ol class="tc-steps">{c.howto.steps.map((st, i) => <li><b>{String(i + 1).padStart(2, '0')}</b><div><h3>{st.t}</h3><p>{st.d}</p></div></li>)}</ol></div></section>
+
+<section class="tc-wrap"><div class="tc-grid tc-features">{c.features.map((f) => <article class={'tc-card' + (f.img ? ' has-img' : '')}>{f.img && <div class="tc-media"><img src={f.img} alt={f.t} loading="lazy" width="800" height="450" /></div>}<h3>{f.t}</h3><p>{f.d}</p></article>)}</div></section>
+
+<section class="tc-wrap"><div class="tc-head"><span class="eyebrow">{zh ? '适用场景' : 'USE CASES'}</span><h2>{c.benefits.title}</h2><p>{c.benefits.sub}</p></div><div class="tc-grid tc-cols4">{c.benefits.items.map((b) => <article class="tc-card slim"><h3>{b.t}</h3><p>{b.d}</p></article>)}</div></section>
+
+<section class="tc-wrap"><div class="tc-head"><span class="eyebrow">{zh ? '相关工具' : 'RELATED TOOLS'}</span><h2>{c.related.title}</h2><p>{c.related.sub}</p></div><div class="tc-grid tc-cols3">{c.related.items.map((r) => <a class="tc-card link" href={P(r.href)}><h3>{r.name}</h3><p>{r.d}</p><strong>{zh ? '打开工具 →' : 'Open tool →'}</strong></a>)}</div></section>
+
+<section class="tc-wrap"><div class="tc-head"><span class="eyebrow">FAQ</span><h2>{zh ? '常见问题' : 'Frequently asked questions'}</h2></div><div class="tc-faq">{c.faq.map((qa) => <details><summary>{qa.q}</summary><p>{qa.a}</p></details>)}</div></section>
+<AdSlot slot={ADSENSE_SLOTS.tool} />

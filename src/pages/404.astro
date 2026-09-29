@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+
+const links = [
+  ['/', 'Image blur'],
+  ['/tools', 'All tools'],
+  ['/blog', 'Blog'],
+  ['/support', 'Support'],
+];
+---
+<Base
+  title="Page not found | Toolbox Image"
+  description="The page you were looking for does not exist. Jump back to the free online image blur, compress and resize tools."
+  path="/"
+  noindex={true}
+  altLang={null}
+>
+  <section class="page-banner"><div class="page-banner-inner"><span class="eyebrow">404</span><h1>Page not found</h1><p class="lede">That link is broken or the page has moved. Everything below still works.</p></div></section>
+  <section class="page-wrap">
+    <div class="legal-section">
+      <h2>Try these instead</h2>
+      <ul>
+        {links.map(([href, name]) => <li><a href={href}>{name}</a></li>)}
+      </ul>
+      <p>Prefer Chinese? Open <a href="/zh/">the Chinese site</a>.</p>
+      <p>Need help? Email <a href="mailto:yangkunming2026@gmail.com">yangkunming2026@gmail.com</a>.</p>
+    </div>
+  </section>
+</Base>

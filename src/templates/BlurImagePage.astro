@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import FullBlurTool from '../components/FullBlurTool.astro';
+import ToolContent from '../components/ToolContent.astro';
+import { type Lang } from '../i18n';
+interface Props { lang?: Lang }
+const { lang = 'en' } = Astro.props;
+const zh = lang === 'zh';
+const title = zh ? '在线图片模糊和马赛克工具 | Toolbox Image' : 'Online Image Blur & Mosaic Tool | Toolbox Image';
+const description = zh ? '在线模糊图片、车牌、人脸和文字，支持画笔、矩形、套索、马赛克和本地下载。' : 'Blur images, plates, faces and text online with brush, rectangle, lasso, mosaic and local download.';
+---
+<Base title={title} description={description} path="/blur-image" lang={lang} preloadBanner={true}>
+  <section class="page-banner"><div class="page-banner-inner"><span class="eyebrow">PRIVACY BLUR</span><h1>{zh ? '在线模糊图片' : 'Blur images online'}</h1><p class="lede">{zh ? '上传图片后拖动强度滑块，实时查看整图模糊效果，支持高斯模糊、像素化和柔和虚化。所有编辑都在浏览器内完成。' : 'Upload an image, drag the strength slider and watch the full-image blur update live — Gaussian, pixelate or soft blur. Every edit happens in your browser.'}</p></div></section>
+  <FullBlurTool lang={lang} />
+  <ToolContent lang={lang} tool="blur-image" />
+</Base>

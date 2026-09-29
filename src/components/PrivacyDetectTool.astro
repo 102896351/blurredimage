@@ -1,0 +1,15 @@
+---
+import { type Lang } from '../i18n';
+interface Props { lang?: Lang }
+const { lang = 'en' } = Astro.props;
+const zh = lang === 'zh';
+const msgs = zh
+  ? { scanDone: '扫描完成，请确认以下候选区域', confirmed: '已确认候选区域，请进入手动编辑器完成处理。', face: '人脸区域', plate: '车牌或文字区域', suggestG: '建议高斯模糊', suggestP: '建议像素化' }
+  : { scanDone: 'Scan complete — please review the candidate areas below', confirmed: 'Areas confirmed. Continue in the manual editor to apply them.', face: 'Face area', plate: 'License plate or text area', suggestG: 'Gaussian blur suggested', suggestP: 'Pixelate suggested' };
+---
+<section class="special-tool detection-tool"><div class="special-head"><div><span class="eyebrow">SMART PRIVACY</span><h2>{zh ? '自动发现隐私区域' : 'Detect private areas automatically'}</h2><p>{zh ? '扫描候选的人脸、车牌和文字，确认后再处理。' : 'Scan for candidate faces, plates and text, then confirm before applying.'}</p></div><label class="upload-mini">{zh ? '上传图片' : 'Upload image'}<input id="detect-file" type="file" accept="image/*" hidden /></label></div><div class="detect-empty" id="detect-empty"><div class="scan-icon">⌁</div><strong>{zh ? '上传图片开始扫描' : 'Upload an image to start scanning'}</strong><span>{zh ? '检测结果只作为建议，不会未经确认直接修改图片。' : 'Detections are suggestions only — your image is never modified without confirmation.'}</span></div><div class="detect-work" id="detect-work" hidden><div class="scan-progress"><div id="scan-bar"></div></div><p id="scan-status">{zh ? '正在分析图片中的候选区域…' : 'Analyzing candidate areas in the image…'}</p><div class="candidate-list" id="candidate-list"></div><div class="detect-actions"><button class="button button-primary" id="confirm-all" type="button">{zh ? '确认全部区域' : 'Confirm all areas'}</button><a class="button button-ghost" href={zh ? '/zh/blur-image' : '/blur-image'}>{zh ? '改用手动涂抹' : 'Use manual brush instead'}</a></div><p class="editor-status">{zh ? '当前为安全的候选框演示。正式接入检测模型后，仍需由你确认每个区域。' : 'This is a safe candidate-box demo. Once a detection model is wired in, you still confirm every area.'}</p></div></section>
+<script type="application/json" id="detect-msgs" set:html={JSON.stringify(msgs)} />
+<script>
+const M=JSON.parse(document.querySelector('#detect-msgs').textContent);
+const di=document.querySelector('#detect-file'),de=document.querySelector('#detect-empty'),dw=document.querySelector('#detect-work'),bar=document.querySelector('#scan-bar'),ds=document.querySelector('#scan-status'),list=document.querySelector('#candidate-list');di.addEventListener('change',()=>{const f=di.files?.[0];if(!f)return;de.hidden=true;dw.hidden=false;bar.style.width='0%';let progress=0;const timer=setInterval(()=>{progress+=20;bar.style.width=`${progress}%`;if(progress>=100){clearInterval(timer);ds.textContent=M.scanDone;list.innerHTML=`<label class="candidate"><input type="checkbox" checked> ${M.face} <span>${M.suggestG}</span></label><label class="candidate"><input type="checkbox" checked> ${M.plate} <span>${M.suggestP}</span></label>`; }},120)});document.querySelector('#confirm-all').addEventListener('click',()=>{ds.textContent=M.confirmed;});
+</script>

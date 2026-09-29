@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import { type Lang } from '../i18n';
+interface Props { lang?: Lang }
+const { lang = 'en' } = Astro.props;
+const zh = lang === 'zh';
+const tools = zh
+  ? [['模糊图片', '/blur-image', '高斯模糊、马赛克和局部隐私处理。'], ['模糊车牌', '/blur-license-plate', '隐藏车辆照片中的车牌号码。'], ['模糊人脸', '/blur-face', '处理照片中的人脸和身份细节。'], ['模糊文字', '/blur-text', '隐藏截图、文档和聊天中的敏感文字。'], ['压缩图片', '/compress-image', '降低文件大小，方便上传和分享。'], ['调整尺寸', '/resize-image', '按宽高、比例和最长边调整图片。'], ['裁剪旋转', '/crop-rotate-image', '裁剪、旋转和翻转图片。'], ['自动隐私识别', '/privacy-blur', '检测潜在的人脸、车牌和文字区域。']]
+  : [['Blur image', '/blur-image', 'Gaussian blur, mosaic and local privacy editing.'], ['Blur license plate', '/blur-license-plate', 'Hide plate numbers in vehicle photos.'], ['Blur faces', '/blur-face', 'Cover faces and identity details in photos.'], ['Blur text', '/blur-text', 'Hide sensitive text in screenshots, documents and chats.'], ['Compress image', '/compress-image', 'Reduce file size for easy uploading and sharing.'], ['Resize image', '/resize-image', 'Resize by width, height, ratio or longest side.'], ['Crop & rotate', '/crop-rotate-image', 'Crop, rotate and flip images.'], ['Smart privacy detect', '/privacy-blur', 'Detect candidate faces, plates and text areas.']];
+---
+<Base title={zh ? '全部在线图片工具 | Toolbox Image' : 'All Online Image Tools | Toolbox Image'} description={zh ? '浏览全部在线图片处理工具，支持模糊、马赛克、压缩、尺寸调整、裁剪旋转和隐私处理。' : 'Browse every online image tool: blur, mosaic, compression, resizing, crop & rotate and privacy protection.'} path="/tools" lang={lang} preloadBanner={true}>
+  <section class="page-banner"><div class="page-banner-inner"><span class="eyebrow">TOOLBOX</span><h1>{zh ? '全部图片工具' : 'All image tools'}</h1><p class="lede">{zh ? '选择一个工具开始处理。图片默认在浏览器内完成，不需要上传。' : 'Pick a tool to get started. Everything runs in your browser — no uploads.'}</p></div></section>
+  <section class="tool-grid">{tools.map(([name, href, text]) => <a class="tool-card" href={zh ? `/zh${href}` : href}><strong>TOOL</strong><h3>{name}</h3><p>{text}</p></a>)}</section>
+</Base>

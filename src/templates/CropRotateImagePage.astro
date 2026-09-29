@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import CropRotateTool from '../components/CropRotateTool.astro';
+import ToolContent from '../components/ToolContent.astro';
+import { type Lang } from '../i18n';
+interface Props { lang?: Lang }
+const { lang = 'en' } = Astro.props;
+const zh = lang === 'zh';
+const heading = zh ? '在线裁剪和旋转图片' : 'Crop and rotate images online';
+const description = zh ? '裁剪图片、旋转方向、水平翻转和垂直翻转，导出适合分享的版本。' : 'Crop, rotate, flip horizontally and vertically, then export a share-ready version.';
+---
+<Base title={`${heading} | Toolbox Image`} description={description} path="/crop-rotate-image" lang={lang} preloadBanner={true}>
+  <section class="page-banner"><div class="page-banner-inner"><span class="eyebrow">CROP & TRANSFORM</span><h1>{heading}</h1><p class="lede">{description}</p></div></section><CropRotateTool lang={lang} /><ToolContent lang={lang} tool="crop-rotate-image" />
+</Base>
