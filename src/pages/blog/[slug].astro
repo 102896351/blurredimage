@@ -15,7 +15,7 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await post.render();
 
-const url = `https://img.toolbox168.xyz/blog/${post.slug}`;
+const url = `https://toolbox168.com/blog/${post.slug}`;
 const articleSchema = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
@@ -26,20 +26,20 @@ const articleSchema = {
   inLanguage: 'en',
   keywords: post.data.tags.join(', '),
   mainEntityOfPage: { '@type': 'WebPage', '@id': url },
-  image: 'https://img.toolbox168.xyz/img/og-cover.jpg',
+  image: 'https://toolbox168.com/img/og-cover.jpg',
   publisher: {
     '@type': 'Organization',
     name: 'Toolbox Image',
-    url: 'https://img.toolbox168.xyz',
-    logo: { '@type': 'ImageObject', url: 'https://img.toolbox168.xyz/img/logo-512.png' },
+    url: 'https://toolbox168.com',
+    logo: { '@type': 'ImageObject', url: 'https://toolbox168.com/img/logo-512.png' },
   },
 };
 const breadcrumb = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://img.toolbox168.xyz/' },
-    { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://img.toolbox168.xyz/blog' },
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://toolbox168.com/' },
+    { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://toolbox168.com/blog' },
     { '@type': 'ListItem', position: 3, name: post.data.title, item: url },
   ],
 };

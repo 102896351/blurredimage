@@ -14,7 +14,7 @@ const { lang = 'en', tool, name, description } = Astro.props;
 const zh = lang === 'zh';
 const c = toolContent[tool as string][lang];
 const P = (href: string) => (zh && !href.startsWith('/zh') ? `/zh${href}` : href);
-const SITE = 'https://img.toolbox168.xyz';
+const SITE = 'https://toolbox168.com';
 const pageUrl = new URL(Astro.url.pathname, SITE).href;
 const appName = name || c.howto.title;
 const appDesc = description || `${c.howto.title}. ${c.howto.sub}`;

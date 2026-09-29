@@ -1,6 +1,6 @@
 export type Lang = 'en' | 'zh';
 
-export const site = 'https://img.toolbox168.xyz';
+export const site = 'https://toolbox168.com';
 
 export const t = {
   en: {

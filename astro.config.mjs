@@ -12,7 +12,7 @@ const onPages = base !== '' && base !== '/';
  * Astro's `base` only rewrites URLs it generates itself. Hand-written absolute
  * paths in templates/content (href="/blog", src="/img/...") and in CSS
  * (url('/img/...')) are patched here after the build. Canonical/og/hreflang
- * URLs are absolute (https://img.toolbox168.xyz/...) and intentionally left
+ * URLs are absolute (https://toolbox168.com/...) and intentionally left
  * pointing at the production domain so the Pages mirror never outranks it.
  */
 function rewriteAbsolutePaths(prefix) {
@@ -62,7 +62,7 @@ function rewriteAbsolutePaths(prefix) {
 }
 
 export default defineConfig({
-  site: 'https://img.toolbox168.xyz',
+  site: 'https://toolbox168.com',
   base,
   integrations: [
     sitemap({
