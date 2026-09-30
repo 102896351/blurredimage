@@ -4,4 +4,4 @@ Allow: /
 # Tag archive pages exist for navigation but are set to noindex in-page.
 # They stay crawlable so internal links still work.
 
-Sitemap: https://toolbox168.com/sitemap-index.xml
+Sitemap: https://toolbox168.com/sitemap-0.xml
