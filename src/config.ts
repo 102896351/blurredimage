@@ -11,7 +11,7 @@
  *    Get it: adsense.google.com → Account → Account information
  *    (apply only AFTER the site has been indexed and has real content)
  */
-export const GA_MEASUREMENT_ID = 'G-PSB71XBZR0';
+export const GA_MEASUREMENT_ID = 'G-PSE7ZKK2R0';
 export const ADSENSE_CLIENT = '';
 
 /** AdSense ad unit slot ids. Fill these in after your account is approved. */
