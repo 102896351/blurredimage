@@ -3,13 +3,293 @@ import { type Lang } from '../i18n';
 interface Props { lang?: Lang }
 const { lang = 'en' } = Astro.props;
 const zh = lang === 'zh';
-const msgs = zh
-  ? { scanDone: '扫描完成，请确认以下候选区域', confirmed: '已确认候选区域，请进入手动编辑器完成处理。', face: '人脸区域', plate: '车牌或文字区域', suggestG: '建议高斯模糊', suggestP: '建议像素化' }
-  : { scanDone: 'Scan complete — please review the candidate areas below', confirmed: 'Areas confirmed. Continue in the manual editor to apply them.', face: 'Face area', plate: 'License plate or text area', suggestG: 'Gaussian blur suggested', suggestP: 'Pixelate suggested' };
+const msgs = {
+  loadingLib: zh ? '正在加载检测引擎…' : 'Loading detection engine…',
+  detecting: zh ? '正在扫描人脸候选区域…' : 'Scanning for candidate faces…',
+  noFaces: zh ? '未检测到人脸。车牌、文字等区域请改用手动涂抹工具。' : 'No faces detected. For plates or text, use the manual brush tool instead.',
+  facesFound: zh ? '检测到人脸，请确认要打码的区域：' : 'Faces detected — confirm the areas to censor:',
+  method: zh ? '打码方式' : 'Censor method',
+  blurM: zh ? '高斯模糊' : 'Gaussian blur',
+  mosaicM: zh ? '马赛克' : 'Pixelate',
+  apply: zh ? '确认并打码' : 'Confirm & censor',
+  reapply: zh ? '重新选择区域' : 'Re-select areas',
+  download: zh ? '下载处理后的图片' : 'Download censored image',
+  retry: zh ? '换一张图片' : 'Choose another image',
+  done: zh ? '打码完成，可在下方下载。图片全程未离开你的浏览器。' : 'Done — download below. Your image never left your browser.',
+  err: zh ? '检测失败，请换一张图片或改用手动涂抹。' : 'Detection failed. Try another image or use the manual brush.',
+  score: zh ? '置信度' : 'confidence',
+  plateNote: zh ? '本工具专注于人脸自动打码；车牌与文字请用手动涂抹，框选后同样本地处理。' : 'This tool auto-censors faces; for plates and text use the manual brush — also processed locally.',
+  privacy: zh ? '检测结果只作为建议，处理完全在本地完成。' : 'Detections are suggestions only — processing happens entirely on your device.'
+};
 ---
-<section class="special-tool detection-tool"><div class="special-head"><div><span class="eyebrow">SMART PRIVACY</span><h2>{zh ? '自动发现隐私区域' : 'Detect private areas automatically'}</h2><p>{zh ? '扫描候选的人脸、车牌和文字，确认后再处理。' : 'Scan for candidate faces, plates and text, then confirm before applying.'}</p></div><label class="upload-mini">{zh ? '上传图片' : 'Upload image'}<input id="detect-file" type="file" accept="image/*" hidden /></label></div><div class="detect-empty" id="detect-empty"><div class="scan-icon">⌁</div><strong>{zh ? '上传图片开始扫描' : 'Upload an image to start scanning'}</strong><span>{zh ? '检测结果只作为建议，不会未经确认直接修改图片。' : 'Detections are suggestions only — your image is never modified without confirmation.'}</span></div><div class="detect-work" id="detect-work" hidden><div class="scan-progress"><div id="scan-bar"></div></div><p id="scan-status">{zh ? '正在分析图片中的候选区域…' : 'Analyzing candidate areas in the image…'}</p><div class="candidate-list" id="candidate-list"></div><div class="detect-actions"><button class="button button-primary" id="confirm-all" type="button">{zh ? '确认全部区域' : 'Confirm all areas'}</button><a class="button button-ghost" href={zh ? '/zh/blur-image' : '/blur-image'}>{zh ? '改用手动涂抹' : 'Use manual brush instead'}</a></div><p class="editor-status">{zh ? '当前为安全的候选框演示。正式接入检测模型后，仍需由你确认每个区域。' : 'This is a safe candidate-box demo. Once a detection model is wired in, you still confirm every area.'}</p></div></section>
+<section class="special-tool detection-tool">
+  <div class="special-head">
+    <div>
+      <span class="eyebrow">SMART PRIVACY</span>
+      <h2>{zh ? '自动发现隐私区域' : 'Detect private areas automatically'}</h2>
+      <p>{zh ? '浏览器本地检测人脸，确认后模糊或马赛克打码。' : 'Face detection runs locally in your browser, then blur or pixelate after confirmation.'}</p>
+    </div>
+    <label class="upload-mini">{zh ? '上传图片' : 'Upload image'}<input id="detect-file" type="file" accept="image/*" hidden /></label>
+  </div>
+  <div class="detect-empty" id="detect-empty">
+    <div class="scan-icon">⌁</div>
+    <strong>{zh ? '上传图片开始扫描' : 'Upload an image to start scanning'}</strong>
+    <span>{msgs.privacy}</span>
+  </div>
+  <div class="detect-work" id="detect-work" hidden>
+    <div class="scan-progress"><div id="scan-bar"></div></div>
+    <p id="scan-status">…</p>
+    <div id="detect-canvas-wrap" hidden><canvas id="detect-canvas"></canvas></div>
+    <div class="candidate-list" id="candidate-list"></div>
+    <div class="detect-methods" id="detect-methods" hidden>
+      <span class="detect-methods-label">{msgs.method}</span>
+      <label class="method-opt"><input type="radio" name="censor-method" value="blur" checked /> {msgs.blurM}</label>
+      <label class="method-opt"><input type="radio" name="censor-method" value="mosaic" /> {msgs.mosaicM}</label>
+    </div>
+    <div class="detect-actions">
+      <button class="button button-primary" id="confirm-all" type="button" hidden>{msgs.apply}</button>
+      <button class="button button-ghost" id="btn-reselect" type="button" hidden>{msgs.reapply}</button>
+      <a class="button button-ghost" id="btn-manual" href={zh ? '/zh/blur-image' : '/blur-image'}>{zh ? '改用手动涂抹' : 'Use manual brush instead'}</a>
+    </div>
+    <div class="detect-result" id="detect-result" hidden>
+      <p class="editor-status ok">{msgs.done}</p>
+      <a class="button button-primary" id="btn-download" download="privacy-censored.png">{msgs.download}</a>
+      <button class="button button-ghost" id="btn-retry" type="button">{msgs.retry}</button>
+    </div>
+    <p class="editor-status">{msgs.plateNote}</p>
+  </div>
+</section>
 <script type="application/json" id="detect-msgs" set:html={JSON.stringify(msgs)} />
 <script>
-const M=JSON.parse(document.querySelector('#detect-msgs').textContent);
-const di=document.querySelector('#detect-file'),de=document.querySelector('#detect-empty'),dw=document.querySelector('#detect-work'),bar=document.querySelector('#scan-bar'),ds=document.querySelector('#scan-status'),list=document.querySelector('#candidate-list');di.addEventListener('change',()=>{const f=di.files?.[0];if(!f)return;de.hidden=true;dw.hidden=false;bar.style.width='0%';let progress=0;const timer=setInterval(()=>{progress+=20;bar.style.width=`${progress}%`;if(progress>=100){clearInterval(timer);ds.textContent=M.scanDone;list.innerHTML=`<label class="candidate"><input type="checkbox" checked> ${M.face} <span>${M.suggestG}</span></label><label class="candidate"><input type="checkbox" checked> ${M.plate} <span>${M.suggestP}</span></label>`; }},120)});document.querySelector('#confirm-all').addEventListener('click',()=>{ds.textContent=M.confirmed;});
+const M = JSON.parse(document.querySelector('#detect-msgs')!.textContent);
+const di = document.querySelector('#detect-file') as HTMLInputElement;
+const de = document.querySelector('#detect-empty') as HTMLElement;
+const dw = document.querySelector('#detect-work') as HTMLElement;
+const bar = document.querySelector('#scan-bar') as HTMLElement;
+const ds = document.querySelector('#scan-status') as HTMLElement;
+const wrap = document.querySelector('#detect-canvas-wrap') as HTMLElement;
+const canvas = document.querySelector('#detect-canvas') as HTMLCanvasElement;
+const list = document.querySelector('#candidate-list') as HTMLElement;
+const methods = document.querySelector('#detect-methods') as HTMLElement;
+const btnConfirm = document.querySelector('#confirm-all') as HTMLButtonElement;
+const btnReselect = document.querySelector('#btn-reselect') as HTMLButtonElement;
+const btnManual = document.querySelector('#btn-manual') as HTMLAnchorElement;
+const result = document.querySelector('#detect-result') as HTMLElement;
+const btnDownload = document.querySelector('#btn-download') as HTMLAnchorElement;
+const btnRetry = document.querySelector('#btn-retry') as HTMLButtonElement;
+
+type Box = { x: number; y: number; w: number; h: number; score: number };
+let base: HTMLCanvasElement | null = null;   // clean image
+let boxes: Box[] = [];
+let censored = false;
+let faceapi: any = null;
+
+const MAX_DIM = 1400;
+
+function setProgress(pct: number, text: string) {
+  bar.style.width = pct + '%';
+  ds.textContent = text;
+}
+
+let libPromise: Promise<any> | null = null;
+function loadLib(): Promise<any> {
+  if ((window as any).faceapi) return Promise.resolve((window as any).faceapi);
+  if (!libPromise) {
+    libPromise = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = '/vendor/face-api.js';
+      s.onload = () => resolve((window as any).faceapi);
+      s.onerror = () => reject(new Error('lib load failed'));
+      document.head.appendChild(s);
+    });
+  }
+  return libPromise;
+}
+
+let modelPromise: Promise<any> | null = null;
+function loadModel(api: any) {
+  if (!modelPromise) modelPromise = api.nets.tinyFaceDetector.loadFromUri('/models/');
+  return modelPromise;
+}
+
+function imageToCanvas(img: HTMLImageElement): HTMLCanvasElement {
+  const scale = Math.min(1, MAX_DIM / Math.max(img.naturalWidth, img.naturalHeight));
+  const c = document.createElement('canvas');
+  c.width = Math.round(img.naturalWidth * scale);
+  c.height = Math.round(img.naturalHeight * scale);
+  c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
+  return c;
+}
+
+function drawView(boxesToDraw: Box[] | null) {
+  const ctx = canvas.getContext('2d')!;
+  ctx.drawImage(base!, 0, 0);
+  if (boxesToDraw) {
+    ctx.lineWidth = Math.max(2, Math.round(canvas.width / 300));
+    ctx.setLineDash([8, 5]);
+    ctx.strokeStyle = '#2563eb';
+    boxesToDraw.forEach((b, i) => {
+      ctx.strokeRect(b.x, b.y, b.w, b.h);
+      ctx.setLineDash([]);
+      const fs = Math.max(14, Math.round(canvas.width / 40));
+      ctx.font = `bold ${fs}px sans-serif`;
+      const label = String(i + 1);
+      const tw = ctx.measureText(label).width + 10;
+      ctx.fillStyle = '#2563eb';
+      ctx.fillRect(b.x, b.y - fs - 6, tw, fs + 6);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(label, b.x + 5, b.y - 6);
+      ctx.setLineDash([8, 5]);
+    });
+    ctx.setLineDash([]);
+  }
+}
+
+function buildList() {
+  list.innerHTML = '';
+  boxes.forEach((b, i) => {
+    const label = document.createElement('label');
+    label.className = 'candidate';
+    const pct = Math.round(b.score * 100);
+    label.innerHTML = `<input type="checkbox" checked data-idx="${i}"> ${i + 1}. ${M.score} ${pct}% <span>${M.blurM}</span>`;
+    list.appendChild(label);
+  });
+}
+
+async function detect() {
+  censored = false;
+  result.hidden = true;
+  methods.hidden = true;
+  btnConfirm.hidden = true;
+  btnReselect.hidden = true;
+  btnManual.hidden = false;
+  wrap.hidden = false;
+  drawView(null);
+  try {
+    setProgress(15, M.loadingLib);
+    faceapi = await loadLib();
+    setProgress(40, M.loadingLib);
+    await loadModel(faceapi);
+    setProgress(65, M.detecting);
+    const opts = new faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.45 });
+    const det = await faceapi.detectAllFaces(canvas, opts);
+    boxes = det.map((d: any) => {
+      const b = d.box;
+      const pad = Math.round(Math.min(b.width, b.height) * 0.12);
+      return {
+        x: Math.max(0, Math.round(b.x - pad)),
+        y: Math.max(0, Math.round(b.y - pad * 1.4)),
+        w: Math.round(b.width + pad * 2),
+        h: Math.round(b.height + pad * 2.2),
+        score: d.score
+      };
+    });
+    setProgress(100, '');
+    if (!boxes.length) {
+      ds.textContent = M.noFaces;
+      btnManual.hidden = false;
+      return;
+    }
+    ds.textContent = M.facesFound;
+    drawView(boxes);
+    buildList();
+    methods.hidden = false;
+    btnConfirm.hidden = false;
+  } catch (e) {
+    setProgress(100, '');
+    ds.textContent = M.err;
+  }
+}
+
+function censorRegion(ctx: CanvasRenderingContext2D, b: Box, method: string) {
+  const x = Math.max(0, b.x), y = Math.max(0, b.y);
+  const w = Math.min(canvas.width - x, b.w), h = Math.min(canvas.height - y, b.h);
+  if (w <= 0 || h <= 0) return;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x, y, w, h);
+  ctx.clip();
+  if (method === 'mosaic') {
+    const block = Math.max(8, Math.round(Math.min(w, h) / 9));
+    const tw = Math.max(1, Math.floor(w / block));
+    const th = Math.max(1, Math.floor(h / block));
+    const tmp = document.createElement('canvas');
+    tmp.width = tw; tmp.height = th;
+    const tctx = tmp.getContext('2d')!;
+    tctx.drawImage(canvas, x, y, w, h, 0, 0, tw, th);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(tmp, 0, 0, tw, th, x, y, w, h);
+    ctx.imageSmoothingEnabled = true;
+  } else {
+    const blurCanvas = document.createElement('canvas');
+    blurCanvas.width = canvas.width; blurCanvas.height = canvas.height;
+    const bctx = blurCanvas.getContext('2d')!;
+    const r = Math.max(10, Math.round(Math.min(w, h) / 4));
+    bctx.filter = `blur(${r}px)`;
+    bctx.drawImage(canvas, 0, 0);
+    ctx.drawImage(blurCanvas, 0, 0);
+  }
+  ctx.restore();
+}
+
+btnConfirm.addEventListener('click', () => {
+  if (!base || !boxes.length) return;
+  const method = (document.querySelector('input[name="censor-method"]:checked') as HTMLInputElement)?.value || 'blur';
+  const ctx = canvas.getContext('2d')!;
+  ctx.drawImage(base, 0, 0);
+  list.querySelectorAll('input[type="checkbox"]:checked').forEach((el) => {
+    const i = Number((el as HTMLInputElement).dataset.idx);
+    if (boxes[i]) censorRegion(ctx, boxes[i], method);
+  });
+  censored = true;
+  ds.textContent = M.done;
+  btnConfirm.hidden = true;
+  btnReselect.hidden = false;
+  btnManual.hidden = true;
+  methods.hidden = true;
+  result.hidden = false;
+  btnDownload.href = canvas.toDataURL('image/png');
+});
+
+btnReselect.addEventListener('click', () => {
+  if (!base) return;
+  censored = false;
+  result.hidden = true;
+  btnReselect.hidden = true;
+  btnConfirm.hidden = false;
+  btnManual.hidden = true;
+  methods.hidden = false;
+  ds.textContent = M.facesFound;
+  drawView(boxes);
+});
+
+btnRetry.addEventListener('click', () => {
+  di.value = '';
+  dw.hidden = true;
+  wrap.hidden = true;
+  result.hidden = true;
+  de.hidden = false;
+  list.innerHTML = '';
+  base = null;
+  boxes = [];
+});
+
+di.addEventListener('change', async () => {
+  const f = di.files?.[0];
+  if (!f) return;
+  de.hidden = true;
+  dw.hidden = false;
+  setProgress(5, '…');
+  const url = URL.createObjectURL(f);
+  const img = new Image();
+  img.onload = () => {
+    base = imageToCanvas(img);
+    canvas.width = base.width;
+    canvas.height = base.height;
+    URL.revokeObjectURL(url);
+    detect();
+  };
+  img.onerror = () => { ds.textContent = M.err; };
+  img.src = url;
+});
 </script>

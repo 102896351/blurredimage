@@ -149,3 +149,14 @@
 @media (max-width:640px){.cookie-bar{padding:12px 16px}.cookie-actions{width:100%}.cookie-actions button{flex:1}}
 .ad-slot{margin:28px auto;max-width:960px;min-height:90px}
 .ad-slot.placeholder{border:1px dashed #d0d5dd;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#98a2b3;font-size:12.5px}
+
+/* privacy-blur real detection (face-api local) */
+#detect-canvas-wrap{margin:14px 0;border:1px solid var(--border,#e5e7eb);border-radius:12px;overflow:hidden;background:#f8fafc;text-align:center}
+#detect-canvas{max-width:100%;height:auto;display:block;margin:0 auto}
+.detect-methods{display:flex;align-items:center;gap:14px;margin:12px 0;flex-wrap:wrap}
+.detect-methods-label{font-weight:600;font-size:.92rem}
+.method-opt{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border,#e5e7eb);border-radius:8px;cursor:pointer;font-size:.9rem;background:#fff}
+.method-opt:has(input:checked){border-color:#2563eb;background:#eff6ff;color:#1d4ed8;font-weight:600}
+.detect-result{margin:14px 0;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.detect-result .button{margin-right:8px}
+.editor-status.ok{color:#15803d;font-weight:600}
