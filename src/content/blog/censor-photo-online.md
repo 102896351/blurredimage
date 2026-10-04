@@ -10,7 +10,7 @@ tags:
 ---
 
 Oct 3, 2026|Toolbox Image|[#privacy](/blog/tags/privacy)[#image-editing](/blog/tags/image-editing)[#redaction](/blog/tags/redaction)[#tutorial](/blog/tags/tutorial)
-<img src="/blog/img/og_image.webp" alt="Censor Photo Online: Redact Faces, Text & Plates Before Sharing" width="1644" height="863" loading="lazy" decoding="async" />
+<img src="/blog/img/censor-photo-online.webp" alt="Censor Photo Online: Redact Faces, Text & Plates Before Sharing" width="1536" height="1024" loading="eager" decoding="async" />
 
 ## Censor Photo Online: A Practical Way to Redact What You Share
 

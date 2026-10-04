@@ -10,7 +10,7 @@ tags:
 ---
 
 Oct 3, 2026|Toolbox Image|[#blur](/blog/tags/blur)[#pixelate](/blog/tags/pixelate)[#image-editing](/blog/tags/image-editing)[#tutorial](/blog/tags/tutorial)
-<img src="/blog/img/og_image.webp" alt="Pixelate vs Blur: Which Should You Use to Hide Data?" width="1644" height="863" loading="lazy" decoding="async" />
+<img src="/blog/img/pixelate-vs-blur.webp" alt="Pixelate vs Blur: Which Should You Use to Hide Data?" width="1536" height="1024" loading="eager" decoding="async" />
 
 ## Pixelate vs Blur: Picking the Right Way to Hide Data
 

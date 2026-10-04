@@ -10,7 +10,7 @@ tags:
 ---
 
 Oct 2, 2026|Toolbox Image|[#gdpr](/blog/tags/gdpr)[#privacy](/blog/tags/privacy)[#image-editing](/blog/tags/image-editing)[#compliance](/blog/tags/compliance)
-<img src="/blog/img/og_image.webp" alt="Blur Image for GDPR: Hide Personal Data Before You Share" width="1644" height="863" loading="lazy" decoding="async" />
+<img src="/blog/img/blur-image-for-gdpr.webp" alt="Blur Image for GDPR: Hide Personal Data Before You Share" width="1536" height="1024" loading="eager" decoding="async" />
 
 ## Blur Image for GDPR: A Practical Way to Hide Personal Data
 
