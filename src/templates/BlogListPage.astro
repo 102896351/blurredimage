@@ -7,11 +7,12 @@ interface Props { lang?: Lang }
 const { lang = 'en' } = Astro.props;
 const zh = lang === 'zh';
 
-const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+const collection = zh ? 'blogZh' : 'blog';
+const posts = (await getCollection(collection, ({ data }) => !data.draft)).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf()
 );
-// Chinese list page reuses the same English posts; cards link to the root English posts.
-const postHref = (slug: string) => (zh ? `/blog/${slug}` : `/blog/${slug}`);
+// Chinese list page shows the Chinese posts and links to their /zh/blog/ URLs.
+const postHref = (slug: string) => (zh ? `/zh/blog/${slug}` : `/blog/${slug}`);
 ---
 <Base
   title={zh ? '图片隐私与编辑指南 | Toolbox Image 博客' : 'Image Privacy & Editing Guides | Toolbox Image Blog'}

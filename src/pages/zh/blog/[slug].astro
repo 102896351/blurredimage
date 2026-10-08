@@ -1,11 +1,11 @@
 ---
 import { getCollection } from 'astro:content';
-import Base from '../../layouts/Base.astro';
-import AdSlot from '../../components/AdSlot.astro';
-import { ADSENSE_SLOTS } from '../../config';
+import Base from '../../../layouts/Base.astro';
+import AdSlot from '../../../components/AdSlot.astro';
+import { ADSENSE_SLOTS } from '../../../config';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const posts = await getCollection('blogZh', ({ data }) => !data.draft);
   return posts.map((post) => ({
     params: { slug: post.slug },
     props: { post },
@@ -15,7 +15,7 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await post.render();
 
-const url = `https://toolbox168.com/blog/${post.slug}`;
+const url = `https://toolbox168.com/zh/blog/${post.slug}`;
 const articleSchema = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
@@ -23,7 +23,7 @@ const articleSchema = {
   description: post.data.description,
   datePublished: post.data.date.toISOString(),
   dateModified: post.data.date.toISOString(),
-  inLanguage: 'en',
+  inLanguage: 'zh-CN',
   keywords: post.data.tags.join(', '),
   mainEntityOfPage: { '@type': 'WebPage', '@id': url },
   image: 'https://toolbox168.com/img/og-cover.jpg',
@@ -38,23 +38,24 @@ const breadcrumb = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://toolbox168.com/' },
-    { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://toolbox168.com/blog' },
+    { '@type': 'ListItem', position: 1, name: '首页', item: 'https://toolbox168.com/zh/' },
+    { '@type': 'ListItem', position: 2, name: '博客', item: 'https://toolbox168.com/zh/blog' },
     { '@type': 'ListItem', position: 3, name: post.data.title, item: url },
   ],
 };
 ---
+
 <Base
   title={post.data.title}
   description={post.data.description}
   path={`/blog/${post.slug}`}
-  lang="en"
-  altLang={`https://toolbox168.com/zh/blog/${post.slug}`}
+  lang="zh"
+  altLang={`/blog/${post.slug}`}
   schema={[articleSchema, breadcrumb]}
 >
   <article class="page-wrap post">
     <header class="post-header">
-      <a class="back-link" href="/blog">← All articles</a>
+      <a class="back-link" href="/zh/blog">← 返回文章列表</a>
       <time datetime={post.data.date.toISOString()}>{post.data.date.toISOString().slice(0, 10)}</time>
       <h1>{post.data.title}</h1>
       <p class="lede">{post.data.description}</p>
@@ -69,10 +70,10 @@ const breadcrumb = {
     </div>
     <AdSlot slot={ADSENSE_SLOTS.article} />
     <footer class="post-footer">
-      <h2>Related tools</h2>
+      <h2>相关工具</h2>
       <div class="button-row">
-        <a class="button button-primary" href="/blur-image">Blur part of an image</a>
-        <a class="button button-ghost" href="/compress-image">Compress images</a>
+        <a class="button button-primary" href="/zh/blur-image">模糊图片局部</a>
+        <a class="button button-ghost" href="/zh/compress-image">压缩图片</a>
       </div>
     </footer>
   </article>
